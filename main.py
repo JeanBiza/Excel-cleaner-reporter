@@ -1,19 +1,39 @@
-from cleaner import clean_excel, normalize_text_values, normalize_dates, normalize_rut
-import json
-
-with open('config.json', 'r', encoding='utf-8') as file:
-    config_json = json.load(file)
-
+from cleaner import clean_excel, auto_clean
+from pathlib import Path
 
 if __name__ == "__main__":
-    df = clean_excel(config_json['input_file'])
-    if config_json['text_columns']:
-        df = normalize_text_values(df,config_json['text_columns'])
-    if config_json['date_columns']:
-        df = normalize_dates(df, config_json['date_columns'])
-    if config_json['rut_columns']:
-        df = normalize_rut(df, config_json['rut_columns'])
+    files = list(Path('input/').glob('*.xlsx'))
 
-    df.to_excel(config_json['output_file'], index=False)
+    if len(files) == 0:
+        print("No hay archivos Excel en la carpeta input/ para procesar")
+    elif len(files) == 1:
+        df = clean_excel(str(files[0]))
+        print(df)
+        df = auto_clean(df)
+        name = files[0].name
+        df.to_excel(f"output/clean_{name}", index=False)
+        print(df)
+    else:
+        for i, file in enumerate(files):
+            print(f"{i+1}. {file.name}")
+
+        try:
+            option = int(input("Selecciona un archivo para procesar (0 para todos): "))
+        except ValueError:
+            print("Opcion invalida")
+            exit()
+
+        if option == 0:
+            for i in files:
+                df = clean_excel(str(i))
+                df = auto_clean(df)
+                name = i.name
+                df.to_excel(f"output/clean_{name}", index=False)
+        else:
+            file = files[option - 1]
+            df = clean_excel(str(file))
+            df = auto_clean(df)
+            name = file.name
+            df.to_excel(f"output/clean_{name}", index=False)
 
 
