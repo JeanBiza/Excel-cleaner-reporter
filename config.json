@@ -1,0 +1,7 @@
+{
+    "input_file": "input/test_clientes.xlsx",
+    "output_file": "output/clean_clientes.xlsx",
+    "text_columns": ["nombre_cliente", "ciudad"],
+    "date_columns": ["fecha_nacimiento"],
+    "rut_columns": ["rut"]
+}
