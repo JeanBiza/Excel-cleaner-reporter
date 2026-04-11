@@ -32,7 +32,7 @@ date_formats = [
 def is_rut(value):
     try:
         return bool(re.match(r'^\d{1,2}\.?\d{3}\.?\d{3}-[\dkK]$', str(value)))
-    except:
+    except (TypeError, ValueError):
         return False
 
 def is_date(value):
@@ -42,7 +42,7 @@ def is_date(value):
         try:
             date = pd.to_datetime(str(value), format=fmt).strftime('%Y-%m-%d')
             return True
-        except Exception:
+        except Exception (TypeError, ValueError):
             continue
     return False
 
@@ -52,7 +52,7 @@ def is_phone(value):
     try:
         if isinstance(value, float):
             value = int(value)
-    except Exception:
+    except Exception (ValueError, OverflowError):
         return False
 
     numbers = re.sub(r'\D', '', str(value))
@@ -71,7 +71,7 @@ def is_email(value):
     try:
         if re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', str(value)):
             return True
-    except Exception:
+    except Exception (TypeError, ValueError):
         return False
 
 def detect_column_type(series: pd.Series) -> str:
@@ -133,18 +133,20 @@ def parse_date(value):
     for fmt in date_formats:
         try:
             return pd.to_datetime(str(value), format=fmt).strftime('%Y-%m-%d')
-        except Exception:
+        except Exception (ValueError, TypeError):
             continue
     return None
 
 def format_rut(value):
     if pd.isna(value):
         return None
-    clean = value.replace(' ', '').replace('.', '').replace('-', '').replace(',', '')
-    num = clean[-1:]
-    body = f"{int(clean[:-1]):,}".replace(',', '.')
-    rut = f"{body}-{num.upper()}"
-    return rut
+    try:
+        clean = value.replace(' ', '').replace('.', '').replace('-', '').replace(',', '')
+        num = clean[-1:]
+        body = f"{int(clean[:-1]):,}".replace(',', '.')
+        return f"{body}-{num.upper()}"
+    except Exception (ValueError, AttributeError):
+        return None
 
 def format_phone(value):
     if pd.isna(value):
@@ -152,7 +154,7 @@ def format_phone(value):
     try:
         if isinstance(value, float):
             value = int(value)
-    except:
+    except Exception (ValueError, OverflowError):
         return None
     numbers = re.sub(r'\D', '', str(value))
     if numbers.startswith('56') and len(numbers) == 11:
@@ -165,8 +167,11 @@ def format_phone(value):
 def format_email(value):
     if pd.isna(value):
         return None
-    email = value.strip().lower()
-    return email
+    try:
+        email = value.strip().lower()
+        return email
+    except AttributeError:
+        return None
 
 def remove_duplicates(df: pd.DataFrame) -> pd.DataFrame:
     df = df.drop_duplicates()
