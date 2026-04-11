@@ -42,7 +42,7 @@ def is_date(value):
         try:
             date = pd.to_datetime(str(value), format=fmt).strftime('%Y-%m-%d')
             return True
-        except Exception (TypeError, ValueError):
+        except (TypeError, ValueError):
             continue
     return False
 
@@ -52,7 +52,7 @@ def is_phone(value):
     try:
         if isinstance(value, float):
             value = int(value)
-    except Exception (ValueError, OverflowError):
+    except (ValueError, OverflowError):
         return False
 
     numbers = re.sub(r'\D', '', str(value))
@@ -71,7 +71,17 @@ def is_email(value):
     try:
         if re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', str(value)):
             return True
-    except Exception (TypeError, ValueError):
+    except (TypeError, ValueError):
+        return False
+
+def is_price(value):
+    if pd.isna(value):
+        return False
+    try:
+        price = str(value).lower().strip()
+        pattern = r'^[-+]?(?:\$|clp|usd|€|eur)\s*[\d.,]+$|^[-+]?[\d.,]+\s*(?:\$|clp|usd|€|eur)$'
+        return bool(re.match(pattern, price))
+    except (TypeError, ValueError):
         return False
 
 def detect_column_type(series: pd.Series) -> str:
@@ -95,6 +105,10 @@ def detect_column_type(series: pd.Series) -> str:
     if email_matches / len(values) > 0.7:
         return "email"
 
+    price_matches = sum(1 for v in values if is_price(v))
+    if price_matches / len(values) > 0.7:
+        return "price"
+
     num_matches = pd.to_numeric(values, errors='coerce').notna().sum()
     if num_matches / len(values) > 0.7:
         return "numeric"
@@ -117,6 +131,8 @@ def auto_clean(df: pd.DataFrame) -> pd.DataFrame:
             df = normalize_phone(df, [col])
         elif col_type == "email":
             df = normalize_email(df, [col])
+        elif col_type == "price":
+            df = normalize_price(df, [col])
     return df
 
 def transform(col: str) -> str:
@@ -133,7 +149,7 @@ def parse_date(value):
     for fmt in date_formats:
         try:
             return pd.to_datetime(str(value), format=fmt).strftime('%Y-%m-%d')
-        except Exception (ValueError, TypeError):
+        except (ValueError, TypeError):
             continue
     return None
 
@@ -145,7 +161,7 @@ def format_rut(value):
         num = clean[-1:]
         body = f"{int(clean[:-1]):,}".replace(',', '.')
         return f"{body}-{num.upper()}"
-    except Exception (ValueError, AttributeError):
+    except (ValueError, AttributeError):
         return None
 
 def format_phone(value):
@@ -154,7 +170,7 @@ def format_phone(value):
     try:
         if isinstance(value, float):
             value = int(value)
-    except Exception (ValueError, OverflowError):
+    except (ValueError, OverflowError):
         return None
     numbers = re.sub(r'\D', '', str(value))
     if numbers.startswith('56') and len(numbers) == 11:
@@ -171,6 +187,20 @@ def format_email(value):
         email = value.strip().lower()
         return email
     except AttributeError:
+        return None
+
+def format_price(value):
+    if pd.isna(value):
+        return None
+    try:
+        price = re.sub(r'[^\d.,]', '', str(value).lower().strip())
+        if ',' in price:
+            price = price.replace('.', '')
+            price = price.replace(',', '.')
+        else:
+            price = price.replace('.', '')
+        return float(price)
+    except (ValueError, TypeError):
         return None
 
 def remove_duplicates(df: pd.DataFrame) -> pd.DataFrame:
@@ -212,8 +242,10 @@ def normalize_email(df: pd.DataFrame, columns: list):
         df[col] = df[col].apply(format_email)
     return df
 
-def normalize_price():
-    pass #Despues
+def normalize_price(df: pd.DataFrame, columns: list):
+    for col in columns:
+        df[col] = df[col].apply(format_price)
+    return df
 
 def remove_empty_rows(df: pd.DataFrame) -> pd.DataFrame:
     df = df.replace(r'^\s*$', None, regex=True)
@@ -226,3 +258,4 @@ def clean_excel(filepath: str) -> pd.DataFrame:
     df = normalize_columns(df)
     df = remove_empty_rows(df)
     return df
+
