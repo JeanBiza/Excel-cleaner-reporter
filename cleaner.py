@@ -1,6 +1,7 @@
 import unicodedata
 import re
 import pandas as pd
+from pathlib import Path
 
 date_formats = [
         '%Y-%m-%d',  # 1990-05-12
@@ -29,9 +30,17 @@ date_formats = [
         '%d%m%Y',  # 12051990
 ]
 
+def log_file(file_name, stats:dict):
+    with open(f"output/log_{file_name}.txt", "w", encoding="utf-8") as file:
+        for key, value in stats.items():
+            file.write(f"{key}: {value}\n")
+
 def is_rut(value):
+    if pd.isna(value):
+        return False
     try:
-        return bool(re.match(r'^\d{1,2}\.?\d{3}\.?\d{3}-[\dkK]$', str(value)))
+        if re.match(r'^\d{1,2}\.?\d{3}\.?\d{3}-[\dkK]$', str(value)):
+            return True
     except (TypeError, ValueError):
         return False
 
@@ -252,10 +261,28 @@ def remove_empty_rows(df: pd.DataFrame) -> pd.DataFrame:
     df = df.dropna(how='all')
     return df
 
-def clean_excel(filepath: str) -> pd.DataFrame:
-    df = pd.read_excel(filepath)
+def clean_excel(filepath: str) -> tuple[pd.DataFrame, dict]:
+    if filepath.endswith('.csv'):
+        df = pd.read_csv(filepath)
+    else:
+        df = pd.read_excel(filepath)
+
+    original_rows = len(df)
+    duplicates = df.duplicated().sum()
+
     df = remove_duplicates(df)
     df = normalize_columns(df)
     df = remove_empty_rows(df)
-    return df
+
+    empty_rows = original_rows - duplicates - len(df)
+
+    stats = {
+        "Archivo": Path(filepath).name,
+        "Filas originales": original_rows,
+        "Duplicados eliminados": int(duplicates),
+        "Filas vacías eliminadas": int(empty_rows),
+        "Filas finales": len(df)
+    }
+
+    return df, stats
 
