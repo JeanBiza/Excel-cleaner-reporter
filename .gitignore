@@ -1,4 +1,7 @@
-.env
+input/*
+output/*
+!input/.gitkeep
+!output/.gitkeep
 .idea/
 __pycache__/
 *.pyc

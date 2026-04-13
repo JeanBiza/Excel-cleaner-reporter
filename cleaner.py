@@ -39,8 +39,7 @@ def is_rut(value):
     if pd.isna(value):
         return False
     try:
-        if re.match(r'^\d{1,2}\.?\d{3}\.?\d{3}-[\dkK]$', str(value)):
-            return True
+        return bool(re.match(r'^\d{1,2}\.?\d{3}\.?\d{3}-[\dkK]$', str(value)))
     except (TypeError, ValueError):
         return False
 
@@ -78,8 +77,7 @@ def is_email(value):
     if pd.isna(value):
         return False
     try:
-        if re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', str(value)):
-            return True
+        return bool(re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', str(value)))
     except (TypeError, ValueError):
         return False
 

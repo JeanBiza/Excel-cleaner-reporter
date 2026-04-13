@@ -34,7 +34,7 @@ def generate_report(df: pd.DataFrame, filename: str, stats: dict):
         completeness = round((1 - nulls / len(df)) * 100, 1)
         null_table_data.append([col, str(nulls), f"{completeness}%"])
 
-    null_table_title = f"Datos Nulos"
+    null_table_title = "Datos Nulos"
     par = Paragraph(null_table_title, styles["Title"])
     story.append(par)
 
