@@ -90,4 +90,4 @@ matplotlib
 
 ## Autor
 
-Jean Biza — [@JeanBiza](https://github.com/JeanBiza)
+Jean — [@JeanBiza](https://github.com/JeanBiza)
