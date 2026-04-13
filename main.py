@@ -1,5 +1,6 @@
 from cleaner import clean_excel, auto_clean, log_file
 from pathlib import Path
+from reporter import generate_report
 
 if __name__ == "__main__":
     path = Path('input/')
@@ -14,6 +15,7 @@ if __name__ == "__main__":
         name = Path(files[0].name).stem
         df.to_excel(f"output/clean_{name}.xlsx", index=False)
         log_file(name, stats)
+        generate_report(df, name, stats)
     else:
         for i, file in enumerate(files):
             print(f"{i+1}. {file.name}")
@@ -35,6 +37,7 @@ if __name__ == "__main__":
                 name = Path(file.name).stem
                 df.to_excel(f"output/clean_{name}.xlsx", index=False)
                 log_file(name, stats)
+                generate_report(df, name, stats)
         else:
             file = files[option - 1]
             print(f"{"-" * 20} Procesando archivo : {file.name} {"-" * 20}")
@@ -43,5 +46,6 @@ if __name__ == "__main__":
             name = Path(file.name).stem
             df.to_excel(f"output/clean_{name}.xlsx", index=False)
             log_file(name, stats)
+            generate_report(df, name, stats)
 
 
