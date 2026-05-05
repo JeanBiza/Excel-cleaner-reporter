@@ -4,11 +4,11 @@ Herramienta de automatización en Python que limpia archivos Excel y CSV con dat
 
 ## Características
 
-- 🔍 **Detección automática de tipos** — identifica fechas, RUTs, teléfonos, emails, precios y texto sin configuración manual
-- 🧼 **Limpieza automática** — elimina duplicados, filas vacías y normaliza cada columna según su tipo
-- 📊 **Reporte PDF** — genera un reporte con tabla de nulos y gráficos de distribución por columna numérica
-- 📝 **Log de cambios** — registra en un `.txt` cuántos duplicados y filas vacías se eliminaron
-- 📁 **Soporte múltiple** — procesa archivos `.xlsx` y `.csv`, uno o varios a la vez
+- Detección automática de tipos — identifica fechas, RUTs, teléfonos, emails, precios y texto sin configuración manual
+- Limpieza automática — elimina duplicados, filas vacías y normaliza cada columna según su tipo
+- Reporte PDF — genera un reporte con tabla de nulos y gráficos de distribución por columna numérica
+- Log de cambios — registra en un .txt cuántos duplicados y filas vacías se eliminaron
+- Soporte múltiple — procesa archivos .xlsx y .csv, uno o varios a la vez
 
 ## ¿Qué normaliza?
 
